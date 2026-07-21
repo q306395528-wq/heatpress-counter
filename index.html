@@ -7,8 +7,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>烫画机声音计数器</title>
-<link rel="stylesheet" href="./style.css?v=3">
-<script src="./app.js?v=3" defer></script>
+<link rel="stylesheet" href="./style.css?v=4">
+<link rel="stylesheet" href="./records.css?v=4">
+<script src="./app.js?v=4" defer></script>
+<script src="./records.js?v=4" defer></script>
 </head>
 <body>
 <main class="app">
@@ -22,6 +24,23 @@
 </section>
 <section class="card db"><div class="db-main"><div><div class="db-title">当前估算分贝</div><div id="currentDb" class="db-value">--<small>dB</small></div></div></div><div class="db-stats"><div class="db-stat"><div class="name">本次平均</div><div id="averageDb" class="value">-- dB</div></div><div class="db-stat"><div class="name">本次最高</div><div id="peakDb" class="value">-- dB</div></div></div><div id="dbNote" class="db-note">手机麦克风估算值，未校准时只适合比较声音大小。</div></section>
 <section class="card monitor"><div class="monitor-head"><span>实时声音强度</span><span id="levelText" class="level-text">0 / 100</span></div><div class="meter"><div id="bar" class="bar"></div><div id="mark" class="threshold-mark"></div></div><div id="last" class="last">点击下方按钮开始监听</div></section>
+
+<section class="card records">
+<div class="records-head">
+<div><div class="records-title-main">生产记录</div><div id="recordSummary" class="records-summary">正在读取记录</div></div>
+<input id="recordDate" class="records-date" type="date" aria-label="选择记录日期">
+</div>
+<div class="records-overview">
+<div><span>所选日期完成</span><b id="dayTotal">0 件</b></div>
+<div><span>平均工作速度</span><b id="daySpeed">--</b></div>
+</div>
+<div class="records-section-title"><span>每小时产量</span><small>速度剔除超过 5 分钟停顿</small></div>
+<div id="hourlyRecords" class="hourly-records"><div class="empty-records">暂无记录</div></div>
+<details class="piece-details"><summary>查看每件完成时间</summary><div id="pieceRecords" class="piece-records"></div></details>
+<div class="records-actions"><button id="jumpToday" class="minor">回到今天</button><button id="exportSelected" class="minor">导出所选日期</button></div>
+<div class="records-footnote">每完成一件会自动保存时间。记录只存在当前手机和当前浏览器中；清除浏览器数据或更换手机后不会自动同步，请定期导出。</div>
+</section>
+
 <div id="secureWarning" class="warning">麦克风只能在 HTTPS 页面使用，请从 GitHub Pages 地址打开。</div>
 <div id="backgroundWarning" class="warning">页面切到后台或手机锁屏后可能漏计，请保持页面在前台。</div>
 <details class="card" open><summary>识别与分贝设置</summary><div class="settings">
@@ -34,7 +53,7 @@
 <div class="field"><div class="switch-row"><label for="keepAwake">监听时保持屏幕常亮</label><input id="keepAwake" type="checkbox" checked></div></div>
 <div class="help">环境声应低于白线，压下和抬起的声音应明显越过白线。误识别就调高阈值；漏识别则调低阈值。</div>
 </div></details>
-<section class="card actions"><button id="test" class="minor">模拟一次声音</button><button id="export" class="minor">导出记录</button><button id="reset" class="minor danger">清空全部</button><button class="minor" onclick="location.reload()">刷新页面</button></section>
+<section class="card actions"><button id="test" class="minor">模拟一次声音</button><button id="export" class="minor">导出全部明细</button><button id="reset" class="minor danger">清空全部</button><button class="minor" onclick="location.reload()">刷新页面</button></section>
 </main>
 <div class="bottom"><button id="start">开始监听</button></div><div id="toast" class="toast">已计数</div>
 </body>
