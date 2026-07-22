@@ -2,12 +2,13 @@
   const $=id=>document.getElementById(id);
   const KEY='heatpress-burnin-settings-v1';
   const el={
-    overlay:$('burnInOverlay'),float:$('burnInFloat'),count:$('burnInCount'),status:$('status'),
+    overlay:$('burnInOverlay'),float:$('burnInFloat'),count:$('burnInCount'),hint:document.querySelector('.burnin-hint'),status:$('status'),
     total:$('total'),enabled:$('burnInMode'),delay:$('burnInDelay'),delayValue:$('burnInDelayValue')
   };
   if(!el.overlay||!el.float||!el.count||!el.status||!el.total||!el.enabled||!el.delay)return;
 
-  let idleTimer=0,moveTimer=0,active=false;
+  let idleTimer=0,moveTimer=0,hintTimer=0,active=false;
+  const sizes=[42,46,50,54,58];
 
   function load(){
     let s={};
@@ -27,20 +28,22 @@
   }
 
   function listening(){return el.status.classList.contains('on')}
-
   function updateCount(){el.count.textContent=el.total.textContent||'0'}
 
   function move(){
     if(!active)return;
-    const x=12+Math.random()*76;
-    const y=15+Math.random()*70;
+    const x=13+Math.random()*74;
+    const y=17+Math.random()*66;
+    const size=sizes[Math.floor(Math.random()*sizes.length)];
     el.float.style.left=x.toFixed(1)+'%';
     el.float.style.top=y.toFixed(1)+'%';
+    el.float.style.setProperty('--burnin-size',size+'px');
   }
 
   function hide(){
     active=false;
     clearInterval(moveTimer);moveTimer=0;
+    clearTimeout(hintTimer);hintTimer=0;
     el.overlay.classList.remove('show');
     el.overlay.setAttribute('aria-hidden','true');
     document.body.classList.remove('burnin-active');
@@ -48,12 +51,17 @@
 
   function show(){
     if(!el.enabled.checked||!listening()||document.hidden)return;
-    active=true;updateCount();move();
+    active=true;
+    updateCount();
+    move();
     el.overlay.classList.add('show');
     el.overlay.setAttribute('aria-hidden','false');
     document.body.classList.add('burnin-active');
+    el.hint?.classList.remove('hidden');
+    clearTimeout(hintTimer);
+    hintTimer=setTimeout(()=>el.hint?.classList.add('hidden'),4500);
     clearInterval(moveTimer);
-    moveTimer=setInterval(move,18000);
+    moveTimer=setInterval(move,17000);
   }
 
   function schedule(){
@@ -91,7 +99,11 @@
     if(document.hidden)hide();else schedule();
   });
 
-  window.addEventListener('pagehide',()=>{clearTimeout(idleTimer);clearInterval(moveTimer)});
+  window.addEventListener('pagehide',()=>{
+    clearTimeout(idleTimer);
+    clearTimeout(hintTimer);
+    clearInterval(moveTimer);
+  });
 
   load();updateCount();schedule();
 })();
