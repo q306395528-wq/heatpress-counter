@@ -8,7 +8,7 @@
   if(!el.overlay||!el.float||!el.count||!el.status||!el.total||!el.enabled||!el.delay)return;
 
   let idleTimer=0,moveTimer=0,hintTimer=0,active=false;
-  const sizes=[42,46,50,54,58];
+  const sizes=[58,62,66,70,74];
 
   function load(){
     let s={};
@@ -32,8 +32,8 @@
 
   function move(){
     if(!active)return;
-    const x=13+Math.random()*74;
-    const y=17+Math.random()*66;
+    const x=15+Math.random()*70;
+    const y=18+Math.random()*64;
     const size=sizes[Math.floor(Math.random()*sizes.length)];
     el.float.style.left=x.toFixed(1)+'%';
     el.float.style.top=y.toFixed(1)+'%';
