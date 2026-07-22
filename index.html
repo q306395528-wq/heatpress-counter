@@ -7,14 +7,15 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>烫画机声音计数器</title>
-<link rel="stylesheet" href="./style.css?v=4">
-<link rel="stylesheet" href="./records.css?v=4">
-<script src="./app.js?v=4" defer></script>
-<script src="./records.js?v=4" defer></script>
+<link rel="stylesheet" href="./style.css?v=5">
+<link rel="stylesheet" href="./records.css?v=5">
+<link rel="stylesheet" href="./template.css?v=5">
+<script src="./app-v5.js?v=5" defer></script>
+<script src="./records.js?v=5" defer></script>
 </head>
 <body>
 <main class="app">
-<header><div><h1>烫画机声音计数器</h1><div class="sub">手机麦克风实时计数 · 数据只保存在本机</div></div><div id="status" class="status">● 未监听</div></header>
+<header><div><h1>烫画机声音计数器</h1><div class="sub">录制目标声音 · 多特征匹配计数 · 数据保存在本机</div></div><div id="status" class="status">● 未监听</div></header>
 <section class="card counter"><div class="label">本次累计</div><div id="total" class="total">0</div><div class="unit">件</div><div class="adjust"><button id="minus" aria-label="减一件">−</button><button id="plus" aria-label="加一件">＋</button></div></section>
 <section class="grid">
 <div class="card metric primary"><div class="name">最近一分钟</div><div id="minute" class="value">0</div><div class="note">滚动统计最近 60 秒</div></div>
@@ -23,7 +24,14 @@
 <div class="card metric"><div class="name">有效计时</div><div id="runtime" class="value" style="font-size:30px">00:00</div><div id="wakeText" class="note">屏幕常亮未启动</div></div>
 </section>
 <section class="card db"><div class="db-main"><div><div class="db-title">当前估算分贝</div><div id="currentDb" class="db-value">--<small>dB</small></div></div></div><div class="db-stats"><div class="db-stat"><div class="name">本次平均</div><div id="averageDb" class="value">-- dB</div></div><div class="db-stat"><div class="name">本次最高</div><div id="peakDb" class="value">-- dB</div></div></div><div id="dbNote" class="db-note">手机麦克风估算值，未校准时只适合比较声音大小。</div></section>
-<section class="card monitor"><div class="monitor-head"><span>实时声音强度</span><span id="levelText" class="level-text">0 / 100</span></div><div class="meter"><div id="bar" class="bar"></div><div id="mark" class="threshold-mark"></div></div><div id="last" class="last">点击下方按钮开始监听</div></section>
+<section class="card monitor"><div class="monitor-head"><span>实时声音强度</span><span id="levelText" class="level-text">0 / 100</span></div><div class="meter"><div id="bar" class="bar"></div><div id="mark" class="threshold-mark"></div></div><div id="last" class="last">先录制一次烫画机目标声音</div></section>
+
+<section class="card template-card">
+<div class="template-head"><div><div class="template-title">目标声音模板</div><div id="templateStatus" class="template-status">尚未录制</div></div><div class="match-box"><span>最近匹配</span><b id="matchScore">--</b></div></div>
+<div id="templateMeta" class="template-meta">录制一次压下或抬起的机器声音，之后只接受相似声音。</div>
+<div class="template-actions"><button id="recordTemplate" class="template-primary">录制目标声音</button><button id="clearTemplate" class="minor">清除模板</button></div>
+<div class="template-tip">点击录制后操作一次烫画机。系统会保存音量、频谱、持续时间；两次声音间隔会在后续工作中自动学习。</div>
+</section>
 
 <section class="card records">
 <div class="records-head">
@@ -44,16 +52,17 @@
 <div id="secureWarning" class="warning">麦克风只能在 HTTPS 页面使用，请从 GitHub Pages 地址打开。</div>
 <div id="backgroundWarning" class="warning">页面切到后台或手机锁屏后可能漏计，请保持页面在前台。</div>
 <details class="card" open><summary>识别与分贝设置</summary><div class="settings">
-<div class="field"><div class="field-head"><label>计数方式</label></div><select id="countMode"><option value="smart2" selected>两遍烫画自动识别（推荐）</option><option value="1">1 次声音 = 1 件</option><option value="2">2 次声音 = 1 件</option><option value="4">4 次声音 = 1 件（不校验时间）</option></select><div class="help">自动模式识别：压下 → 约 6 秒抬起 → 再压下 → 约 6 秒抬起，完成后计 1 件。</div></div>
-<div class="field"><div class="field-head"><label for="pressSeconds">每遍烫压时间</label><span id="pressSecondsValue">6 秒</span></div><input id="pressSeconds" type="range" min="3" max="15" step="1" value="6"><div class="help">机器设定为 6 秒就保持 6；系统会允许少量时间误差。</div></div>
+<div class="field"><div class="field-head"><label>计数方式</label></div><select id="countMode"><option value="smart2" selected>两遍烫画自动识别（推荐）</option><option value="1">1 次目标声音 = 1 件</option><option value="2">2 次目标声音 = 1 件</option><option value="4">4 次目标声音 = 1 件（不校验时间）</option></select><div class="help">自动模式：模板匹配成功后，再按“压下 → 约 6 秒抬起 → 再压下 → 约 6 秒抬起”的顺序计 1 件。</div></div>
+<div class="field"><div class="field-head"><label for="pressSeconds">每遍烫压时间</label><span id="pressSecondsValue">6 秒</span></div><input id="pressSeconds" type="range" min="3" max="15" step="1" value="6"><div class="help">机器设定为 6 秒就保持 6；系统允许少量时间误差。</div></div>
+<div class="field"><div class="field-head"><label for="strictness">模板匹配严格度</label><span id="strictnessValue">72%</span></div><input id="strictness" type="range" min="50" max="92" step="1" value="72"><div class="help">误识别多就提高；机器声音有变化导致漏识别就降低。建议先用 72%。</div></div>
 <div class="field"><div class="field-head"><label>声音类型</label></div><select id="mode"><option value="general" selected>机械声 / 通用响声</option><option value="beep">电子提示音 / 蜂鸣声</option></select></div>
-<div class="field"><div class="field-head"><label for="threshold">声音阈值</label><span id="thresholdValue">26</span></div><input id="threshold" type="range" min="5" max="90" value="26"></div>
+<div class="field"><div class="field-head"><label for="threshold">候选声音阈值</label><span id="thresholdValue">26</span></div><input id="threshold" type="range" min="5" max="90" value="26"><div class="help">只负责从环境声中截取候选声音，不再直接计数。候选声音还必须通过模板匹配。</div></div>
 <div class="field"><div class="field-head"><label for="cooldown">防重复间隔</label><span id="cooldownValue">1000 ms</span></div><input id="cooldown" type="range" min="300" max="4000" step="100" value="1000"></div>
 <div class="field"><div class="field-head"><label for="dbCalibration">分贝校准值</label><span id="dbCalibrationValue">100</span></div><input id="dbCalibration" type="range" min="70" max="130" step="1" value="100"><div class="help">有专业分贝仪时调到两边读数接近；没有就保持 100。</div></div>
 <div class="field"><div class="switch-row"><label for="keepAwake">监听时保持屏幕常亮</label><input id="keepAwake" type="checkbox" checked></div></div>
-<div class="help">环境声应低于白线，压下和抬起的声音应明显越过白线。误识别就调高阈值；漏识别则调低阈值。</div>
+<div class="help">识别依据：频谱特征 45% + 音量 18% + 持续时间 18% + 主频与波形 14% + 两次声音间隔 5%。</div>
 </div></details>
-<section class="card actions"><button id="test" class="minor">模拟一次声音</button><button id="export" class="minor">导出全部明细</button><button id="reset" class="minor danger">清空全部</button><button class="minor" onclick="location.reload()">刷新页面</button></section>
+<section class="card actions"><button id="test" class="minor">模拟一次匹配</button><button id="export" class="minor">导出全部明细</button><button id="reset" class="minor danger">清空生产数据</button><button class="minor" onclick="location.reload()">刷新页面</button></section>
 </main>
 <div class="bottom"><button id="start">开始监听</button></div><div id="toast" class="toast">已计数</div>
 </body>
