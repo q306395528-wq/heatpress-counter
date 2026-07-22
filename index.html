@@ -7,11 +7,13 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>烫画机声音计数器</title>
-<link rel="stylesheet" href="./style.css?v=5">
-<link rel="stylesheet" href="./records.css?v=5">
-<link rel="stylesheet" href="./template.css?v=5">
-<script src="./app-v5.js?v=5" defer></script>
-<script src="./records.js?v=5" defer></script>
+<link rel="stylesheet" href="./style.css?v=6">
+<link rel="stylesheet" href="./records.css?v=6">
+<link rel="stylesheet" href="./template.css?v=6">
+<link rel="stylesheet" href="./burnin.css?v=6">
+<script src="./app-v5.js?v=6" defer></script>
+<script src="./records.js?v=6" defer></script>
+<script src="./burnin.js?v=6" defer></script>
 </head>
 <body>
 <main class="app">
@@ -60,10 +62,13 @@
 <div class="field"><div class="field-head"><label for="cooldown">防重复间隔</label><span id="cooldownValue">1000 ms</span></div><input id="cooldown" type="range" min="300" max="4000" step="100" value="1000"></div>
 <div class="field"><div class="field-head"><label for="dbCalibration">分贝校准值</label><span id="dbCalibrationValue">100</span></div><input id="dbCalibration" type="range" min="70" max="130" step="1" value="100"><div class="help">有专业分贝仪时调到两边读数接近；没有就保持 100。</div></div>
 <div class="field"><div class="switch-row"><label for="keepAwake">监听时保持屏幕常亮</label><input id="keepAwake" type="checkbox" checked></div></div>
+<div class="field"><div class="switch-row"><label for="burnInMode">防烧屏模式</label><input id="burnInMode" type="checkbox" checked></div><div class="help">监听期间无操作后显示纯黑页面，只保留低亮、自动移动的小计数数字；麦克风继续识别。</div></div>
+<div class="field"><div class="field-head"><label for="burnInDelay">进入防烧屏等待时间</label><span id="burnInDelayValue" class="burnin-setting-value">30 秒</span></div><input id="burnInDelay" type="range" min="15" max="120" step="15" value="30"><div class="help">点击黑屏任意位置即可恢复完整界面。</div></div>
 <div class="help">识别依据：频谱特征 45% + 音量 18% + 持续时间 18% + 主频与波形 14% + 两次声音间隔 5%。</div>
 </div></details>
 <section class="card actions"><button id="test" class="minor">模拟一次匹配</button><button id="export" class="minor">导出全部明细</button><button id="reset" class="minor danger">清空生产数据</button><button class="minor" onclick="location.reload()">刷新页面</button></section>
 </main>
 <div class="bottom"><button id="start">开始监听</button></div><div id="toast" class="toast">已计数</div>
+<div id="burnInOverlay" aria-hidden="true"><div id="burnInFloat" class="burnin-float"><div id="burnInCount" class="burnin-count">0</div><div class="burnin-unit">件</div><div class="burnin-listening">● 正在监听</div><div class="burnin-hint">轻触屏幕恢复</div></div></div>
 </body>
 </html>
