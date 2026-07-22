@@ -275,8 +275,8 @@
   function normalize(v){const norm=Math.sqrt(v.reduce((s,x)=>s+x*x,0))||1;return v.map(x=>x/norm)}
   function finishEvent(now){
     const e=eventCapture;eventCapture=null;belowSince=0;if(!e)return;
-    const duration=Math.max(40,e.lastAbove-e.start),peak=Math.max(...e.levels),loudness=median(e.rms),frames=e.spectra.length;
-    if(duration<45||peak<Math.max(4,+el.threshold.value*.72))return;
+    const duration=Math.max(60,e.lastAbove-e.start+80),peak=Math.max(...e.levels),loudness=median(e.rms),frames=e.spectra.length;
+    if(peak<Math.max(4,+el.threshold.value*.72))return;
     const spectrum=new Array(18).fill(0);for(const f of e.spectra)for(let i=0;i<18;i++)spectrum[i]+=f[i];for(let i=0;i<18;i++)spectrum[i]/=frames;
     const features={version:1,recordedAt:Date.now(),duration,peak,loudness,spectrum:normalize(spectrum),centroid:median(e.centroids),zcr:median(e.zcr),sampleRate:ctx.sampleRate};
     lastCandidateAt=now;
@@ -338,7 +338,7 @@
     const onset=Math.max(threshold,noiseFloor+Math.max(4,threshold*.18)),release=Math.max(noiseFloor+2,onset*.48);
     el.bar.style.width=level.toFixed(1)+'%';el.levelText.textContent=Math.round(level)+' / 100';
     if(!eventCapture){
-      if(level>=onset&&now-lastCandidateAt>=Math.min(900,+el.cooldown.value)){startEvent(now,level,rms)}
+      if(level>=onset&&now-lastCandidateAt>=+el.cooldown.value){startEvent(now,level,rms)}
     }else{
       const aboveRelease=level>=release;collectEvent(now,level,rms,aboveRelease);
       if(aboveRelease)belowSince=0;else if(!belowSince)belowSince=now;
@@ -351,7 +351,7 @@
   async function recordTemplate(){
     if(training){training=false;eventCapture=null;renderTemplate();el.last.textContent='已取消录制目标声音';return}
     const ok=await ensureAudio();if(!ok)return;
-    training=true;eventCapture=null;belowSince=0;renderTemplate();el.last.textContent='请现在操作一次烫画机，系统会自动截取声音';
+    training=true;eventCapture=null;belowSince=0;partial=0;resetSmart();renderTemplate();el.last.textContent='请现在操作一次烫画机，系统会自动截取声音';
   }
   function clearTemplate(){
     if(!soundTemplate)return;
